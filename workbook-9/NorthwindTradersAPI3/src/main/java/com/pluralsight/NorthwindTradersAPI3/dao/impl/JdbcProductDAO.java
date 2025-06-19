@@ -2,8 +2,8 @@ package com.pluralsight.NorthwindTradersAPI3.dao.impl;
 
 
 
-import com.pluralsight.NorthwindTradersAPI3.dao.interfaces.ICategoryDAO;
-import com.pluralsight.NorthwindTradersAPI3.models.Category;
+import com.pluralsight.NorthwindTradersAPI3.dao.interfaces.IProductDAO;
+import com.pluralsight.NorthwindTradersAPI3.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,50 +16,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class JdbcCategoryDAO implements ICategoryDAO {
+public class JdbcProductDAO implements IProductDAO {
 
     private final DataSource dataSource;
 
     @Autowired
-    public JdbcCategoryDAO(DataSource dataSource) {
+    public JdbcProductDAO(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
     @Override
-    public List<Category> getAll() {
-        List<Category> categories = new ArrayList<>();
-        String sql = "SELECT CategoryID, CategoryName FROM Categories";
+    public List<Product> getAll() {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT ProductID, ProductName, CategoryID, UnitPrice FROM Products";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
+                int productID = resultSet.getInt("ProductID");
+                String productName = resultSet.getString("ProductName");
                 int categoryID = resultSet.getInt("CategoryID");
-                String categoryName = resultSet.getString("CategoryName");
-                Category category = new Category(categoryID,categoryName);
-                categories.add(category);
+                double unitPrice = resultSet.getDouble("UnitPrice");
+                Product product = new Product(productID,productName,categoryID,unitPrice);
+                products.add(product);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return categories;
+        return products;
     }
 
     @Override
-    public Category getById(int id) {
-        String sql = "SELECT CategoryID, CategoryName FROM Categories WHERE CategoryID = ?";
+    public Product getById(int id) {
+        String sql = "SELECT ProductID, ProductName, CategoryID, UnitPrice FROM Products WHERE ProductID = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setInt(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
+                    int productID = resultSet.getInt("ProductID");
+                    String productName = resultSet.getString("ProductName");
                     int categoryID = resultSet.getInt("CategoryID");
-                    String categoryName = resultSet.getString("CategoryName");
-                    Category category = new Category(categoryID,categoryName);
-                    return category;
+                    double unitPrice = resultSet.getDouble("UnitPrice");
+                    Product product = new Product(productID,productName,categoryID,unitPrice);
+                    return product;
                 }
             }
         } catch (SQLException e) {
@@ -70,20 +74,22 @@ public class JdbcCategoryDAO implements ICategoryDAO {
     }
 
     @Override
-    public Category insert(Category category) {
-        String sql = "INSERT INTO Categories (CategoryName) VALUES (?)";
+    public Product insert(Product product) {
+        String sql = "INSERT INTO Products (ProductName, CategoryID, UnitPrice) VALUES (?, ?, ?)";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setString(1, category.getCategoryName());
+            statement.setString(1, product.getProductName());
+            statement.setInt(2, product.getCategoryId());
+            statement.setDouble(3, product.getUnitPrice());
             statement.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return category;
+        return product;
     }
 
 }

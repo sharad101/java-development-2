@@ -1,11 +1,10 @@
 package com.pluralsight.NorthwindTradersAPI3.controllers;
 
 
-import com.pluralsight.NorthwindTradersAPI2.models.Product;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import com.pluralsight.NorthwindTradersAPI3.dao.interfaces.IProductDAO;
+import com.pluralsight.NorthwindTradersAPI3.models.Product;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +12,9 @@ import java.util.List;
 @RestController
 public class ProductsController {
     private List<Product> products;
+
+    @Autowired
+    private IProductDAO productDao;
 
     public ProductsController() {
         products = new ArrayList<>();
@@ -37,5 +39,11 @@ public class ProductsController {
         }
         return null;
     }
+
+    @RequestMapping(path = "/products", method = RequestMethod.POST)
+    public Product addProduct(@RequestBody Product product) {
+        return productDao.insert(product);
+    }
+
 }
 
