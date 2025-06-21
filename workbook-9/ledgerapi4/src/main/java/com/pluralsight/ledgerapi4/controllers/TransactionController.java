@@ -39,6 +39,18 @@ public class TransactionController {
     public Transaction addTransaction(@RequestBody Transaction transaction){
         return transactionDAO.add(transaction);
 
+    }
+
+    @RequestMapping(path = "/transactions/{transactionId}", method = RequestMethod.PUT)
+    public void updateTransaction(@PathVariable int transactionId, @RequestBody Transaction transaction ){
+        transactionDAO.update(transactionId,transaction);
+
+    }
+
+    @RequestMapping(path = "/transactions/{transactionId}", method = RequestMethod.DELETE)
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deleteTransaction(@PathVariable int transactionId){
+        transactionDAO.delete(transactionId);
 
     }
 }
